@@ -31,7 +31,7 @@ BERT_NAME  = "bert-base-uncased"
 RIDGE_LAMBDA   = 1e-2
 ALPHAS         = [0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 TOPK_MASK      = 10    # top-K 재랭킹 (0이면 비활성)
-CKPT_PATH      = "classification/classification_model"   # 기존 모델 체크포인트(.pt) 있으면 경로 지정
+CKPT_PATH      = "classification/save_model/classification_model.pth"   # 기존 모델 체크포인트(.pt) 있으면 경로 지정
 
 #-----------------seed----------------------
 def set_seed(seed=42):
@@ -114,9 +114,9 @@ def train_linear_probe(model, dl_tr, dl_te, class_name, epochs=EPOCHS_LP):
     print(f"[LP] test acc={acc:.2f}%")
     pred_array = torch.cat(all_pred).cpu().numpy()
     y_array = torch.cat(all_y).cpu().numpy()
-    plane_model_eval(y_array, pred_array, class_name)
+    plain_eval = model_eval(y_array, pred_array, class_name)
     torch.save(model.state_dict(), CKPT_PATH)
-    return model
+    return model, plain_eval
 
 # -------------------- Feature & Prototype --------------------
 @torch.no_grad()
@@ -164,7 +164,11 @@ def default_prompts_for(classes):
     ]
     d = {c: [t.format(c=c) for t in tmpl] for c in classes}
     # 필요 시 특정 클래스 커스텀 덮어쓰기(예: Siamese 등)
-    if "American Pit Bull Terrier" in d:
+     
+    in_text_list = ["American Pit Bull Terrier", "Birman", "Chihuahua", "Staffordshire Bull Terrier",
+                    "Wheaten Terrier", "Saint Bernard", "Ragdoll", "Beagle", "English Setter"]
+    
+    if "American Pit Bull Terrier" in classes:
         d["American Pit Bull Terrier"] = [
             "American Pit Bull Terrier has a muscular and stocky build.",
             "American Pit Bull Terrier has a short coat that is smooth and glossy.",
@@ -175,18 +179,19 @@ def default_prompts_for(classes):
             "American Pit Bull Terrier appears in many coat colors including brindle fawn and black.",
             "American Pit Bull Terrier stands with a confident and athletic posture."
         ]
-    elif "Birman" in d:
+    if "Birman" in classes:
         d["Birman"] = [
-            "Birman has a silky medium-long coat with a pale cream body.",
-            "Birman shows darker points on the face ears legs and tail.",
-            "Birman has bright blue eyes that are round and expressive.",
-            "Birman has white gloves on all four paws.",
-            "Birman has medium-sized ears with slightly rounded tips.",
-            "Birman has a sweet rounded facial appearance.",
-            "Birman has a bushy tail proportional to the body length.",
-            "Birman has a soft coat that lies close without matting easily."
+            "Birman has medium long silky coat with pale body and dark points",
+            "Birman has bright blue round eyes",
+            "Birman shows white gloves on all four paws a key trait",
+            "Birman ears are medium with rounded tips",
+            "Birman tail is bushy and proportional",
+            "Birman face is sweet and rounded compared to Siamese wedge face",
+            "Birman coat is soft and not woolly",
+            "Birman body is medium strong not as large as Ragdoll"
         ]
-    elif "Chihuahua" in d:
+        
+    if "Chihuahua" in classes:
         d["Chihuahua"] = [
             "Chihuahua has a compact small frame with a rounded apple head.",
             "Chihuahua has large round expressive eyes.",
@@ -197,7 +202,7 @@ def default_prompts_for(classes):
             "Chihuahua commonly appears in fawn black chocolate and cream colors.",
             "Chihuahua has a delicate yet well-balanced body."
         ]
-    elif "Staffordshire Bull Terrier" in d:
+    if "Staffordshire Bull Terrier" in classes:
         d["Staffordshire Bull Terrier"] = [
             "Staffordshire Bull Terrier has a broad skull and pronounced cheek muscles.",
             "Staffordshire Bull Terrier has a short smooth close-fitting coat.",
@@ -208,7 +213,7 @@ def default_prompts_for(classes):
             "Staffordshire Bull Terrier appears in brindle red black and white colors.",
             "Staffordshire Bull Terrier has muscular limbs and a sturdy athletic stance."
         ]
-    elif "Wheaten Terrier" in d:
+    if "Wheaten Terrier" in classes:
         d["Wheaten Terrier"] = [
             "Wheaten Terrier has a soft silky coat with a wheaten pale gold color.",
             "Wheaten Terrier has hair that is wavy or gently flowing and never wiry.",
@@ -219,7 +224,7 @@ def default_prompts_for(classes):
             "Wheaten Terrier has a coat that often shows a subtle shimmering quality.",
             "Wheaten Terrier has a well-proportioned agile body."
         ]
-    elif "Saint Bernard" in d:
+    if "Saint Bernard" in classes:
         d["Saint Bernard"] = [
             "Saint Bernard has a massive muscular frame.",
             "Saint Bernard has a dense coat that is smooth or slightly rough with white and red-brown markings.",
@@ -230,7 +235,7 @@ def default_prompts_for(classes):
             "Saint Bernard has a broad deep chest.",
             "Saint Bernard often shows a white blaze on the face and white paws."
         ]
-    elif "Ragdoll" in d:
+    if "Ragdoll" in classes:
         d["Ragdoll"] = [
             "Ragdoll has a semi-long silky plush coat.",
             "Ragdoll has a light-colored body with darker points on the ears face legs and tail.",
@@ -241,7 +246,7 @@ def default_prompts_for(classes):
             "Ragdoll has a sweet gentle facial expression.",
             "Ragdoll shows coat patterns such as colorpoint mitted or bicolor."
         ]
-    elif "Pomeranian" in d:
+    if "Pomeranian" in classes:
         d["Pomeranian"] = [
             "Pomeranian has a dense double coat with a fluffy outer layer.",
             "Pomeranian has a wedge-shaped head with a short muzzle.",
@@ -252,7 +257,7 @@ def default_prompts_for(classes):
             "Pomeranian has a compact squarely built body.",
             "Pomeranian has a distinctive mane of fur around the neck."
         ]
-    elif "Beagle" in d:
+    if "Beagle" in classes:
         d["Beagle"] = [
             "Beagle has a short dense coat with tricolor or bicolor patterns.",
             "Beagle has a slightly domed head with a straight muzzle.",
@@ -263,7 +268,7 @@ def default_prompts_for(classes):
             "Beagle often shows a black saddle with white legs and tan markings.",
             "Beagle has a broad nose with open nostrils."
         ]
-    elif "English Setter" in d:
+    if "English Setter" in classes:
         d["English Setter"] = [
             "English Setter has a long silky coat with feathering on the ears legs and tail.",
             "English Setter shows belton coat patterns in blue orange lemon or liver.",
@@ -274,7 +279,7 @@ def default_prompts_for(classes):
             "English Setter has a deep chest with well-sprung ribs.",
             "English Setter moves with a graceful flowing gait."
         ]
-    return d
+    return d, in_text_list
 
 @torch.no_grad()
 def build_label_contexts(prompts_dict, layer_idx=8):
@@ -293,9 +298,11 @@ def build_label_contexts(prompts_dict, layer_idx=8):
             for i in range(len(ids)-len(cls_ids)+1):
                 if ids[i:i+len(cls_ids)] == cls_ids:
                     pos = i; break
-            v = hs.mean(0) if pos == -1 else hs[pos:pos+len(cls_ids)].mean(0)
+            v = hs.mean(0) if pos == -1 else hs[pos:pos+len(cls_ids)].max(0).values
+            #v = hs.mean(0) if pos == -1 else hs[pos:pos+len(cls_ids)].mean(0)
             sent_vs.append(v)
-        v_cls = torch.stack(sent_vs, 0).mean(0)
+        v_cls = torch.stack(sent_vs, 0).max(0).values
+        #v_cls = torch.stack(sent_vs, 0).mean(0)
         v_cls = F.normalize(v_cls, dim=-1)
         names.append(cls); vecs.append(v_cls.cpu())
     C = torch.stack(vecs, 0)  # (K, d_bert)
@@ -325,13 +332,28 @@ def per_class_report(y_true, y_pred, class_names):
     return df
 
 # model eval
-def plane_model_eval(y_true: np.ndarray, y_pred: np.ndarray, class_names):
+def model_eval(y_true: np.ndarray, y_pred: np.ndarray, class_names):
     df = per_class_report(y_true, y_pred, class_names)
     print("\n=== Worst 15 classes by (P+R+F1)/3 at best alpha ===")
     for _, row in df.head(15).iterrows():
         print(f"{row['class']:<25} avg={row['avg']*100:5.1f}%  "
             f"(P={row['precision']*100:4.1f}  R={row['recall']*100:4.1f}  F1={row['f1']*100:4.1f})")
+    return df
 
+
+def compare_model(plain_df:pd.DataFrame, method_df:pd.DataFrame, text_class):
+    method_df.set_index('class', inplace=True)
+    plain_df.set_index('class', inplace=True)
+    print("compare       consist text vs plain")
+    for class_name in text_class:
+        # 'class_name' 인덱스를 사용해 해당 행(Series)을 바로 가져옵니다.
+        method_row = method_df.loc[class_name]
+        plain_row = plain_df.loc[class_name]
+        
+        print(f"{class_name:<25} avg={method_row['avg']*100 - plain_row['avg']*100:5.1f}%   "
+            f"(P={method_row['precision']*100 - plain_row['precision']*100:4.1f}  "
+            f"R={method_row['recall']*100 - plain_row['recall']*100:4.1f}  "
+            f"F1={method_row['f1']*100 - plain_row['f1']*100:4.1f})")
 # -------------------- Main --------------------
 def main():
     set_seed(42)
@@ -357,11 +379,11 @@ def main():
         print(f"[LP] test acc={acc:.2f}%")
         pred_array = torch.cat(all_pred).cpu().numpy()
         y_array = torch.cat(all_y).cpu().numpy()
-        plane_model_eval(y_array, pred_array, classes)
+        plain_eval = model_eval(y_array, pred_array, classes)
         
     else:
         print("No checkpoint. Training linear probe (backbone frozen)...")
-        model = train_linear_probe(model, dl_tr, dl_te, classes, epochs=EPOCHS_LP)
+        model, plain_eval = train_linear_probe(model, dl_tr, dl_te, classes, epochs=EPOCHS_LP)
         
     # 2) Train split에서 이미지 특징/프로토타입
     H_tr, L_tr, Y_tr = extract_feats(model, dl_tr)
@@ -373,9 +395,9 @@ def main():
     
 
     # 4) BERT 라벨 컨텍스트
-    prompts = default_prompts_for(classes)
+    prompts, in_text_list = default_prompts_for(classes)
     names_ctx, C_bert = build_label_contexts(prompts, layer_idx=8)
-    assert names_ctx == classes, "클래스 순서가 다릅니다."
+    #assert names_ctx == classes, "클래스 순서가 다릅니다."
 
     # 5) BERT -> 이미지공간 정렬행렬 & 텍스트 프로토타입 매핑
     M = fit_align_BERT_to_IMG(C_bert, IMG_protos, ridge_lambda=RIDGE_LAMBDA)  # (d_img, d_bert)
@@ -431,11 +453,8 @@ def main():
     print(f"\nBest alpha: {best_a:.2f}  Top-1={best_acc*100:.2f}%")
 
     # 8) Worst 15 classes by (P+R+F1)/3 at best alpha
-    df = per_class_report(Y_te.numpy(), best_pred, classes)
-    print("\n=== Worst 15 classes by (P+R+F1)/3 at best alpha ===")
-    for _, row in df.head(15).iterrows():
-        print(f"{row['class']:<25} avg={row['avg']*100:5.1f}%  "
-              f"(P={row['precision']*100:4.1f}  R={row['recall']*100:4.1f}  F1={row['f1']*100:4.1f})")
+    method_eval = model_eval(Y_te.numpy(), best_pred, classes)
+
     
     def flip_rate_between(logits_a: torch.Tensor, logits_b: torch.Tensor) -> float:
         """두 로짓의 argmax가 달라진 비율(예측 뒤집힘 비율)을 반환."""
@@ -465,6 +484,8 @@ def main():
     print("alpha  |  flip_rate(%)  |  acc(%)")
     for a, fr, acc in zip(alphas, flip_rates, accs):
         print(f"{a:5.2f} | {fr*100:12.3f} | {acc*100:7.3f}")
+    
+    compare_model(plain_eval, method_eval, in_text_list)
 
     # (1) Flip rate vs alpha
     plt.figure()
