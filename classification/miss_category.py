@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 # ===== 설정 =====
-CKPT_PATH = "classification/best_pet_classifier.pth"  # 학습된 모델 경로
+CKPT_PATH = "classification/save_model/best_pet_classifier.pth"  # 학습된 모델 경로
 ARCH = "resnet50"  # resnet18 / resnet50 / vit_b_16
 IMG_SIZE = 224
 BATCH_SIZE = 64

@@ -1,6 +1,7 @@
 # ======= Context-Prior Logit Fusion on Oxford-IIIT Pets (MVP) =======
 # 베이스: CLIP zero-shot
 # 보정: BERT 기반 라벨-문장 컨텍스트(z1 pooling) -> 선형사상 M -> 로짓 가산
+# 모델 3개 사용버전(image:res, text: CLIP_image, BERT_text <- 두 모델을 이용해서 pior만듬)
 
 import os, json, math, torch, numpy as np
 import torch.nn.functional as F
