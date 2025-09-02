@@ -1,2 +1,3 @@
 /classification/save_model/
 /data/
+*.pyc

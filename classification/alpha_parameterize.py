@@ -21,6 +21,8 @@ import pandas as pd
 from my_fuctions.load_text import default_prompts_from_json
 
 
+
+
 # -------------------- Config --------------------
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 IMG_SIZE   = 224
@@ -227,6 +229,23 @@ def compare_model(plain_df:pd.DataFrame, method_df:pd.DataFrame, text_class):
             f"(P={method_row['precision']*100 - plain_row['precision']*100:4.1f}  "
             f"R={method_row['recall']*100 - plain_row['recall']*100:4.1f}  "
             f"F1={method_row['f1']*100 - plain_row['f1']*100:4.1f})")
+        
+# ------------------- train_alpha--------------
+class LogitFusionModel(nn.Module):
+    def __init__(self, initial_alpha=0.0):
+        super().__init__()
+        # alpha를 학습 가능한 파라미터로 선언합니다.
+        # nn.Parameter로 감싸면, PyTorch가 이 텐서를
+        # optimizer가 업데이트해야 할 모델의 가중치로 인식합니다.
+        self.alpha = nn.Parameter(torch.tensor(initial_alpha))
+
+    def forward(self, logits_base, prior_residual):
+        # 최종 로짓을 계산합니다.
+        # self.alpha는 학습 과정에서 최적의 값으로 자동 업데이트됩니다.
+        final_logits = logits_base + self.alpha * prior_residual
+        return final_logits        
+        
+
 # -------------------- Main --------------------
 def main():
     set_seed(42)
@@ -234,149 +253,108 @@ def main():
     trainset, testset, dl_tr, dl_te, classes = get_loaders()
     K = len(classes)
 
-    # 1) Model
+    # 1) Model 로드 또는 학습
     model = ResNetFeat(num_classes=K).to(DEVICE)
     if CKPT_PATH and os.path.isfile(CKPT_PATH):
         model.load_state_dict(torch.load(CKPT_PATH, map_location=DEVICE))
         print(f"Loaded checkpoint: {CKPT_PATH}")
-        
-        # 1-1) Model eval for per_class
+        # 체크포인트 로드 시, baseline 성능 평가
         model.eval()
         all_pred, all_y = [], []
         with torch.no_grad():
-            for x,y in dl_te:
-                x,y = x.to(DEVICE), y.to(DEVICE)
+            for x, y in dl_te:
+                x, y = x.to(DEVICE), y.to(DEVICE)
                 logits = model(x)
                 all_pred.append(logits.argmax(1).cpu()); all_y.append(y.cpu())
-        acc = (torch.cat(all_pred)==torch.cat(all_y)).float().mean().item()*100
-        print(f"[LP] test acc={acc:.2f}%")
         pred_array = torch.cat(all_pred).cpu().numpy()
         y_array = torch.cat(all_y).cpu().numpy()
         plain_eval = model_eval(y_array, pred_array, classes)
-        
     else:
         print("No checkpoint. Training linear probe (backbone frozen)...")
         model, plain_eval = train_linear_probe(model, dl_tr, dl_te, classes, epochs=EPOCHS_LP)
-        
-    # 2) Train split에서 이미지 특징/프로토타입
+
+    # 2) Train과 Test 데이터셋 모두에서 특징과 로짓 추출
+    print("Extracting features from training set...")
     H_tr, L_tr, Y_tr = extract_feats(model, dl_tr)
-    IMG_protos = class_image_prototypes(H_tr, Y_tr, num_classes=K)    # (K, d_img)
+    print("Extracting features from test set...")
+    H_te, L_te, Y_te = extract_feats(model, dl_te) # ❗ FIX: H_tr이 아닌 H_te로 올바르게 할당
 
-    # 3) Test split 특징/로짓
-    H_te, L_te, Y_te = extract_feats(model, dl_te)                    # H_te normalized
-    
-    
+    # 3) 이미지 프로토타입 생성 (학습 데이터 기준)
+    IMG_protos = class_image_prototypes(H_tr, Y_tr, num_classes=K)
 
-    # 4) BERT 라벨 컨텍스트
+    # 4) BERT 라벨 컨텍스트 생성
     prompts, in_text_list = default_prompts_from_json(classes, TEXT_PATH)
     names_ctx, C_bert = build_label_contexts(prompts, layer_idx=8)
-    #assert names_ctx == classes, "클래스 순서가 다릅니다."
 
-    # 5) BERT -> 이미지공간 정렬행렬 & 텍스트 프로토타입 매핑
-    M = fit_align_BERT_to_IMG(C_bert, IMG_protos, ridge_lambda=RIDGE_LAMBDA)  # (d_img, d_bert)
-    C_map = F.normalize(C_bert @ M.T, dim=-1)                                  # (K, d_img)
+    # 5) BERT -> 이미지 공간 정렬행렬 학습
+    M = fit_align_BERT_to_IMG(C_bert, IMG_protos, ridge_lambda=RIDGE_LAMBDA)
+    C_map = F.normalize(C_bert @ M.T, dim=-1)
 
-    # 6) 베이스 로짓(기존 모델) & Prior
-    logits_base = L_te.clone()                      # (N, K) 기존 모델 로짓
-    prior = (H_te @ C_map.T)                        # (N, K) 텍스트-이미지 유사도
-    # 안정화: 제로-평균
-    prior = prior - prior.mean(dim=1, keepdim=True)
-
-    # top-K 재랭킹(옵션)
-    if TOPK_MASK and TOPK_MASK > 0:
-        topk_idx = logits_base.topk(TOPK_MASK, dim=1).indices
-        mask = torch.zeros_like(logits_base).scatter(1, topk_idx, 1.0)
-    else:
-        mask = torch.ones_like(logits_base)
+    # =================================================================
+    # ✨ ALPHA 학습을 위한 데이터 준비 (학습 데이터 기준) ✨
+    # =================================================================
     
+    # (6-train) 학습 데이터에 대한 prior 계산
+    prior_tr = (H_tr @ C_map.T)
     
-    # 1) prior와 base의 스케일 확인
+    # (7-train) 학습 데이터에 대한 스케일 보정
+    base_zm_tr = L_tr - L_tr.mean(dim=1, keepdim=True)
+    prior_zm_tr = prior_tr - prior_tr.mean(dim=1, keepdim=True)
+    scale_tr = (base_zm_tr.std() / (prior_zm_tr.std() + 1e-8)).item()
+    prior_calib_tr = prior_zm_tr * scale_tr
+    
+    # (8) LogitFusionModel 학습 시작
+    print("\n--- Training learnable alpha ---")
+    fusion_model = LogitFusionModel(initial_alpha=0.0).to(DEVICE)
+    optimizer = torch.optim.AdamW(fusion_model.parameters(), lr=1e-2)
+    criterion = nn.CrossEntropyLoss()
+
+    # DataLoader를 사용하여 미니배치 학습
+    from torch.utils.data import TensorDataset
+    train_fusion_dataset = TensorDataset(L_tr, prior_calib_tr, Y_tr)
+    train_fusion_loader = DataLoader(train_fusion_dataset, batch_size=1024, shuffle=True)
+    
+    fusion_model.train()
+    for epoch in range(200):
+        for logits_base_batch, prior_calib_batch, labels_batch in train_fusion_loader:
+            final_logits = fusion_model(logits_base_batch.to(DEVICE), prior_calib_batch.to(DEVICE))
+            loss = criterion(final_logits, labels_batch.to(DEVICE))
+            
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+        
+        if (epoch + 1) % 10 == 0:
+            print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}, Learned alpha: {fusion_model.alpha.item():.4f}")
+
+    # =================================================================
+    # ✨ 최종 평가 (테스트 데이터 기준) ✨
+    # =================================================================
+    
+    # (6-test) 테스트 데이터에 대한 prior 계산
+    prior_te = (H_te @ C_map.T)
+    
+    # (7-test) 테스트 데이터에 대한 스케일 보정
+    base_zm_te = L_te - L_te.mean(dim=1, keepdim=True)
+    prior_zm_te = prior_te - prior_te.mean(dim=1, keepdim=True)
+    scale_te = (base_zm_te.std() / (prior_zm_te.std() + 1e-8)).item()
+    prior_calib_te = prior_zm_te * scale_te
+
+    # (9) 학습된 모델로 최종 성능 평가
+    fusion_model.eval()
     with torch.no_grad():
-        base_zm  = logits_base - logits_base.mean(dim=1, keepdim=True)
-        prior_zm = prior       - prior.mean(dim=1, keepdim=True)
-
-        print("[scale] base std =", base_zm.std().item(), "prior std =", prior_zm.std().item())
-
-        # 2) top-1 vs top-2 마진과 prior가 뒤집을 수 있는지
-        top2_vals, top2_idx = logits_base.topk(2, dim=1)
-        margin = (top2_vals[:,0] - top2_vals[:,1]).cpu().numpy()  # 양수일수록 1위가 유리
-        print("[margin] mean=", margin.mean(), "p25=", np.percentile(margin,25),
-            "p50=", np.percentile(margin,50), "p75=", np.percentile(margin,75))
-
-        # 3) prior가 주는 최대 변화량(행별 max-min)
-        delta = (prior * (mask if 'mask' in locals() else 1.0)).cpu().numpy()
-        row_span = delta.max(axis=1) - delta.min(axis=1)
-        print("[prior span] mean=", row_span.mean(), "p75=", np.percentile(row_span,75))
-
-    scale = (base_zm.std() / (prior_zm.std() + 1e-8)).item()
-    prior_calib = prior_zm * scale
-    
-
-    # 7) Alpha sweep
-    print("\n=== Base vs Ours (Text-Prior Logit Fusion, No-CLIP) ===")
-    best_acc, best_a, best_pred = -1, None, None
-    for a in ALPHAS:
-        logits = logits_base if a==0 else (logits_base + a * prior_calib * mask)
-        pred = logits.argmax(1).numpy()
+        best_alpha_learned = fusion_model.alpha.item()
+        print(f"\nTraining finished. Optimal learned alpha = {best_alpha_learned:.4f}")
+        
+        # 테스트 데이터에 학습된 alpha 적용
+        final_logits_test = fusion_model(L_te.to(DEVICE), prior_calib_te.to(DEVICE))
+        pred = final_logits_test.argmax(1).cpu().numpy()
         acc = accuracy_score(Y_te.numpy(), pred)
-        print(f"alpha={a:.2f}  Top-1={acc*100:.2f}%")
-        if acc > best_acc:
-            best_acc, best_a, best_pred = acc, a, pred
-
-    print(f"\nBest alpha: {best_a:.2f}  Top-1={best_acc*100:.2f}%")
-
-    # 8) Worst 15 classes by (P+R+F1)/3 at best alpha
-    method_eval = model_eval(Y_te.numpy(), best_pred, classes)
-
-    
-    def flip_rate_between(logits_a: torch.Tensor, logits_b: torch.Tensor) -> float:
-        """두 로짓의 argmax가 달라진 비율(예측 뒤집힘 비율)을 반환."""
-        pa = logits_a.argmax(dim=1)
-        pb = logits_b.argmax(dim=1)
-        return (pa != pb).float().mean().item()
-
-    # 스케일링 후 prior 사용
-    logits_scaled = logits_base + a * prior_calib * mask
-    print("flip_rate vs base =", flip_rate_between(logits_base, logits_scaled))
-    
-    alphas = np.linspace(0.0, 3.0, 31)  # 0.0 ~ 3.0 사이 31 포인트
-
-    flip_rates = []
-    accs = []
-
-    with torch.no_grad():
-        for a in alphas:
-            logits_new = logits_base + a * prior_calib * mask
-            fr = flip_rate_between(logits_base, logits_new)
-            pred = logits_new.argmax(dim=1).cpu().numpy()
-            acc = accuracy_score(Y_te.numpy(), pred)
-            flip_rates.append(fr)
-            accs.append(acc)
-
-    # 수치 요약 출력
-    print("alpha  |  flip_rate(%)  |  acc(%)")
-    for a, fr, acc in zip(alphas, flip_rates, accs):
-        print(f"{a:5.2f} | {fr*100:12.3f} | {acc*100:7.3f}")
-    
-    compare_model(plain_eval, method_eval, in_text_list)
-
-    # (1) Flip rate vs alpha
-    plt.figure()
-    plt.plot(alphas, flip_rates, marker='o')
-    plt.xlabel("alpha")
-    plt.ylabel("flip rate")
-    plt.title("Flip rate vs alpha")
-    plt.grid(True)
-    plt.show()
-
-    # (2) Accuracy vs alpha (원한다면 함께 확인)
-    plt.figure()
-    plt.plot(alphas, accs, marker='o')
-    plt.xlabel("alpha")
-    plt.ylabel("accuracy")
-    plt.title("Accuracy vs alpha")
-    plt.grid(True)
-    plt.show()
+        print(f"Test accuracy with learned alpha: {acc*100:.2f}%")
+        
+        # 클래스별 성능 리포트
+        method_eval = model_eval(Y_te.numpy(), pred, classes)
+        compare_model(plain_eval, method_eval, in_text_list) # 필요 시 비교 함수 호출
 
 
 if __name__ == "__main__":

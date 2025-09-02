@@ -17,6 +17,7 @@ from torchvision.datasets import OxfordIIITPet
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, AutoModel
 import pandas as pd
+from my_fuctions.load_text import default_prompts_from_json
 
 # -------------------- Config --------------------
 DEVICE        = "cuda" if torch.cuda.is_available() else "cpu"
@@ -32,6 +33,7 @@ ALPHAS        = [0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 TOPK_MASK     = 5          # top-K 재랭킹 (0이면 비활성, len(classes)면 해제)
 CKPT_PATH     = "classification/save_model/classification_model.pth"       # 선형프로브 가중치 저장/불러오기 경로 (.pt)
 SEED          = 42
+TEXT_PATH      = "my_fuctions/text.json"
 
 # ---- Text context 강화: 여러 BERT hidden layers 앙상블 ----
 CONTEXT_LAYERS = [6, 8, 10]   # 예: [6,8,10] 또는 [4,8,12]
@@ -119,9 +121,9 @@ def train_linear_probe(model, dl_tr, dl_te, class_name, epochs=EPOCHS_LP):
     print(f"[LP] test acc={acc:.2f}%")
     pred_array = torch.cat(all_pred).cpu().numpy()
     y_array = torch.cat(all_y).cpu().numpy()
-    plane_model_eval(y_array, pred_array, class_name)
+    plain_eval = model_eval(y_array, pred_array, class_name)
     torch.save(model.state_dict(), CKPT_PATH)
-    return model
+    return model, plain_eval
 
 # -------------------- Feature & Prototype --------------------
 @torch.no_grad()
@@ -163,182 +165,7 @@ def class_image_prototypes(H, Y, num_classes, return_raw=False):
 
 
 
-def inject_discriminative_prompts(d):
-    upd = {
-        "American Pit Bull Terrier": [
-            "American Pit Bull Terrier has a muscular lean body taller and longer than Staffordshire Bull Terrier",
-            "American Pit Bull Terrier shows a broad flat skull and powerful jaw with a defined stop",
-            "American Pit Bull Terrier has a short glossy coat and tight skin",
-            "American Pit Bull Terrier often has cropped or high set ears giving a taller outline",
-            "American Pit Bull Terrier chest is deep but not overly wide compared to Staffordshire Bull Terrier",
-            "American Pit Bull Terrier legs are longer and straighter giving an athletic stance",
-            "American Pit Bull Terrier tail is thick at base and tapers carried straight",
-            "American Pit Bull Terrier expression is alert and confident"
-        ],
-        "Staffordshire Bull Terrier": [
-            "Staffordshire Bull Terrier has a compact stocky body shorter and thicker than American Pit Bull Terrier",
-            "Staffordshire Bull Terrier shows a very broad head and pronounced cheek muscles",
-            "Staffordshire Bull Terrier has a short close coat and wide front",
-            "Staffordshire Bull Terrier chest is wide and deep with strong forequarters",
-            "Staffordshire Bull Terrier legs are shorter with heavy bone and a low center of gravity",
-            "Staffordshire Bull Terrier ears are small rose or half pricked",
-            "Staffordshire Bull Terrier tail is medium length and tapers carried low",
-            "Staffordshire Bull Terrier stance appears sturdy and powerful"
-        ],
-        "Ragdoll": [
-            "Ragdoll has semi long silky coat with colorpoint pattern and blue eyes",
-            "Ragdoll body is large and heavy with a relaxed gentle posture",
-            "Ragdoll ears are medium with rounded tips and set slightly forward",
-            "Ragdoll tail is long and bushy matching point color",
-            "Ragdoll face is sweet with a flat plane between the eyes",
-            "Ragdoll coat shows colorpoint mitted or bicolor patterns",
-            "Ragdoll has a light body color with darker extremities",
-            "Ragdoll expression is soft and calm compared to Siamese which is slimmer"
-        ],
-        "Bengal": [
-            "Bengal has a sleek muscular body with wild appearance",
-            "Bengal coat shows rosettes or large spots unlike Egyptian Mau small spots",
-            "Bengal pelt is short dense and often has glitter",
-            "Bengal head is small relative to body with prominent whisker pads",
-            "Bengal tail is thick with rounded tip often ringed",
-            "Bengal moves with athletic gait and strong hindquarters",
-            "Bengal ears are medium small and rounded tips",
-            "Bengal eyes are oval to round often green or gold"
-        ],
-        "Maine Coon": [
-            "Maine Coon is very large with rectangular body and strong bone",
-            "Maine Coon shows tufted lynx like ears and long shaggy coat",
-            "Maine Coon tail is very long and bushy",
-            "Maine Coon muzzle is square unlike British Shorthair round muzzle",
-            "Maine Coon has a ruff around the neck and breeches on hind legs",
-            "Maine Coon paws are large often with toe tufts",
-            "Maine Coon head is slightly longer than wide",
-            "Maine Coon expression is alert and friendly"
-        ],
-        "Birman": [
-            "Birman has medium long silky coat with pale body and dark points",
-            "Birman has bright blue round eyes",
-            "Birman shows white gloves on all four paws a key trait",
-            "Birman ears are medium with rounded tips",
-            "Birman tail is bushy and proportional",
-            "Birman face is sweet and rounded compared to Siamese wedge face",
-            "Birman coat is soft and not woolly",
-            "Birman body is medium strong not as large as Ragdoll"
-        ],
-        "British Shorthair": [
-            "British Shorthair has a round face and chubby cheeks",
-            "British Shorthair coat is dense plush and crisp",
-            "British Shorthair body is cobby with short thick legs",
-            "British Shorthair eyes are large round copper or gold",
-            "British Shorthair muzzle is short and round unlike Maine Coon square muzzle",
-            "British Shorthair ears are small and widely set",
-            "British Shorthair tail is thick with a rounded tip",
-            "British Shorthair expression is calm and teddy bear like"
-        ],
-        "American Bulldog": [
-            "American Bulldog has a large athletic body taller than Boxer",
-            "American Bulldog head is broad with strong muzzle and undershot bite in some lines",
-            "American Bulldog chest is deep with muscular shoulders",
-            "American Bulldog coat is short and close often white with patches",
-            "American Bulldog ears can be rose or semi erect",
-            "American Bulldog tail is thick at base and tapers",
-            "American Bulldog stance is powerful yet agile",
-            "American Bulldog movement shows strong drive from rear"
-        ],
-        "Russian Blue": [
-            "Russian Blue has short dense bluish gray coat with silver sheen",
-            "Russian Blue eyes are vivid green a key trait",
-            "Russian Blue body is fine boned and graceful",
-            "Russian Blue head has a smooth wedge with large ears",
-            "Russian Blue tail is long and tapering",
-            "Russian Blue whisker pads are prominent giving a gentle smile",
-            "Russian Blue coat is double and plush to touch",
-            "Russian Blue expression is reserved and elegant"
-        ],
-        "Abyssinian": [
-            "Abyssinian has a slender athletic body with ticked coat",
-            "Abyssinian coat shows agouti ticking not spots or stripes",
-            "Abyssinian ears are large and alert",
-            "Abyssinian eyes are almond shaped gold to green",
-            "Abyssinian tail is long and tapering",
-            "Abyssinian head is slightly rounded wedge",
-            "Abyssinian coat color is warm ruddy or sorrel tones",
-            "Abyssinian stance looks lively and curious"
-        ],
-        "Chihuahua": [
-            "Chihuahua has a tiny compact body with apple shaped head",
-            "Chihuahua eyes are large round and expressive",
-            "Chihuahua ears are very large and upright",
-            "Chihuahua muzzle is short and slightly pointed",
-            "Chihuahua tail is sickle shaped and carried over the back",
-            "Chihuahua coat can be smooth or long",
-            "Chihuahua legs are fine and delicate",
-            "Chihuahua expression is alert and lively"
-        ],
-        "Persian": [
-            "Persian has a long flowing coat and heavy bone",
-            "Persian face is flat with a short nose and large round eyes",
-            "Persian body is cobby with low legs",
-            "Persian ears are small and rounded set low",
-            "Persian tail is short and plumed",
-            "Persian coat requires full grooming and appears full around neck",
-            "Persian eyes are copper or blue or odd eyes depending on color",
-            "Persian expression is sweet and serene"
-        ],
-        "Boxer": [
-            "Boxer has a medium large muscular body with deep chest",
-            "Boxer head shows a distinct stop and strong muzzle with undershot bite",
-            "Boxer coat is short and tight often fawn or brindle with white markings",
-            "Boxer ears may be natural or cropped and are set high",
-            "Boxer tail is set high and often docked in some regions",
-            "Boxer movement is energetic with springy gait",
-            "Boxer expression is alert and playful",
-            "Boxer outline is more athletic and less bulky than American Bulldog"
-        ],
-        "Egyptian Mau": [
-            "Egyptian Mau has a naturally spotted coat with small round spots",
-            "Egyptian Mau body is medium and graceful with longer hind legs",
-            "Egyptian Mau eyes are gooseberry green a key trait",
-            "Egyptian Mau head is slightly rounded wedge with visible mascara lines",
-            "Egyptian Mau tail is medium long with dark rings",
-            "Egyptian Mau coat shows spots on body and stripes on legs and tail",
-            "Egyptian Mau ears are medium large and alert",
-            "Egyptian Mau expression is vivid and watchful"
-        ],
-        "Miniature Pinscher": [
-            "Miniature Pinscher has a small compact square body",
-            "Miniature Pinscher coat is smooth short and glossy",
-            "Miniature Pinscher head is wedge shaped with defined stop",
-            "Miniature Pinscher eyes are dark oval and keen",
-            "Miniature Pinscher ears are high set and often erect",
-            "Miniature Pinscher tail is high set and straight",
-            "Miniature Pinscher common colors are black and tan solid red and stag red",
-            "Miniature Pinscher moves with a high stepping gait"
-        ]
-    }
-    for k, v in upd.items():
-        if k in d:
-            d[k] = v
-    return d
 
-
-
-# -------------------- Text: prompts --------------------
-def default_prompts_for(classes):
-    # 클래스명 포함 필수! (라벨 토큰 컨텍스트 사용)
-    tmpl = [
-        "{c} has distinctive coat patterns.",
-        "{c} shows a characteristic ear shape.",
-        "{c} typically has specific eye shape and color.",
-        "{c} has a typical body size and proportions.",
-        "{c} has a recognizable muzzle and face structure.",
-        "{c} has a notable tail shape and carriage.",
-        "{c} coat length and texture help identify it.",
-    ]
-    d = {c: [t.format(c=c) for t in tmpl] for c in classes}
-
-    d = inject_discriminative_prompts(d)
-    return d
 
 # -------------------- Text: BERT 컨텍스트 (다중 레이어 앙상블) --------------------
 @torch.no_grad()
@@ -411,18 +238,38 @@ def per_class_report(y_true, y_pred, class_names):
     df = pd.DataFrame(rows, columns=["class","precision","recall","f1","avg"]).sort_values("avg")
     return df
 
-def print_worst_15(df):
-    print("\n=== Worst 15 classes by (P+R+F1)/3 ===")
-    for _, row in df.head(15).iterrows():
-        print(f"{row['class']:<25} avg={row['avg']*100:5.1f}%  "
-              f"(P={row['precision']*100:4.1f}  R={row['recall']*100:4.1f}  F1={row['f1']*100:4.1f})")
-
-def plane_model_eval(y_true: np.ndarray, y_pred: np.ndarray, class_names):
+def model_eval(y_true: np.ndarray, y_pred: np.ndarray, class_names):
     df = per_class_report(y_true, y_pred, class_names)
-    print("\n=== Worst 15 classes by (P+R+F1)/3 at best alpha ===")
-    for _, row in df.head(15).iterrows():
+    print("\n=== classes by (P+R+F1)/3 at best alpha ===")
+    #for _, row in df.head(15).iterrows():
+    for _, row in df.iterrows():
         print(f"{row['class']:<25} avg={row['avg']*100:5.1f}%  "
             f"(P={row['precision']*100:4.1f}  R={row['recall']*100:4.1f}  F1={row['f1']*100:4.1f})")
+    return df
+
+def compare_model(plain_df:pd.DataFrame, method_df:pd.DataFrame, text_class):
+    method_df.set_index('class', inplace=True)
+    plain_df.set_index('class', inplace=True)
+    print("compare       consist text vs plain")
+    
+    class_dict = {}
+    for class_name in text_class:
+        eval_dict = {}
+        # 'class_name' 인덱스를 사용해 해당 행(Series)을 바로 가져옵니다.
+        method_row = method_df.loc[class_name]
+        plain_row = plain_df.loc[class_name]
+        
+        print(f"{class_name:<25} avg={method_row['avg']*100 - plain_row['avg']*100:5.1f}%   "
+            f"(P={method_row['precision']*100 - plain_row['precision']*100:4.1f}  "
+            f"R={method_row['recall']*100 - plain_row['recall']*100:4.1f}  "
+            f"F1={method_row['f1']*100 - plain_row['f1']*100:4.1f})")
+        eval_dict['precision'] = method_row['precision']*100 - plain_row['precision']*100
+        eval_dict['recall'] = method_row['recall']*100 - plain_row['recall']*100
+        eval_dict['f1'] = method_row['f1']*100 - plain_row['f1']*100
+        eval_dict['avg'] = method_row['avg']*100 - plain_row['avg']*100
+        class_dictclass_name = eval_dict
+    return class_dict
+
 
 # -------------------- Main --------------------
 def main():
@@ -431,6 +278,7 @@ def main():
     # 0) Data
     trainset, testset, dl_tr, dl_te, classes = get_loaders()
     K = len(classes)
+    
 
     # 1) Model
     model = ResNetFeat(num_classes=K).to(DEVICE)
@@ -449,10 +297,10 @@ def main():
         print(f"[LP] test acc={acc:.2f}%")
         pred_array = torch.cat(all_pred).cpu().numpy()
         y_array = torch.cat(all_y).cpu().numpy()
-        plane_model_eval(y_array, pred_array, classes)
+        plain_eval = model_eval(y_array, pred_array, classes)
     else:
         print("No checkpoint. Training linear probe (backbone frozen)...")
-        model = train_linear_probe(model, dl_tr, dl_te,classes, epochs=EPOCHS_LP)
+        model, plain_eval = train_linear_probe(model, dl_tr, dl_te, classes, epochs=EPOCHS_LP)
         if CKPT_PATH:
             torch.save(model.state_dict(), CKPT_PATH)
             print(f"Saved checkpoint: {CKPT_PATH}")
@@ -465,9 +313,9 @@ def main():
     H_te, L_te, Y_te = extract_feats(model, dl_te)
 
     # 4) BERT 라벨 컨텍스트 (다중 레이어 앙상블)
-    prompts = default_prompts_for(classes)
+    prompts, in_text_list = default_prompts_from_json(classes, TEXT_PATH)
     names_ctx, C_bert = build_label_contexts_multi(prompts, layers=CONTEXT_LAYERS)
-    assert names_ctx == classes, "클래스 순서가 다릅니다."
+    #assert names_ctx == classes, "클래스 순서가 다릅니다."
 
     # 5) BERT -> 이미지공간 정렬행렬 (Ridge 타깃: 정규화 전 평균)
     M = fit_align_BERT_to_IMG(C_bert, IMG_protos_raw, ridge_lambda=RIDGE_LAMBDA)  # (d_img, d_bert)
@@ -524,8 +372,7 @@ def main():
     print(f"\nBest alpha: {best_a:.2f}  Top-1={best_acc*100:.2f}%")
 
     # 8) Per-class report
-    df = per_class_report(Y_te.numpy(), best_pred, classes)
-    print_worst_15(df)
+    method_eval = model_eval(Y_te.numpy(), best_pred, classes)
 
     # (옵션) 플롯
     if PLOT_CURVES:
@@ -546,6 +393,14 @@ def main():
             print(f"{a:5.2f} | {fr*100:12.3f} | {acc*100:7.3f}")
         plt.figure(); plt.plot(alphas, flip_rates, marker='o'); plt.xlabel("alpha"); plt.ylabel("flip rate"); plt.title("Flip rate vs alpha"); plt.grid(True); plt.show()
         plt.figure(); plt.plot(alphas, accs, marker='o'); plt.xlabel("alpha"); plt.ylabel("accuracy"); plt.title("Accuracy vs alpha"); plt.grid(True); plt.show()
+
+
+    class_dict = compare_model(plain_eval, method_eval, in_text_list)
+    
+    output_filename = f"classification/result/eval.json"
+    with open(output_filename, "w", encoding="utf-8") as f:
+        json.dump(class_dict, f, ensure_ascii=False, indent=4)
+
 
 if __name__ == "__main__":
     main()

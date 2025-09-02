@@ -1,0 +1,372 @@
+{
+    "American Pit Bull Terrier": [
+        "American Pit Bull Terrier has a muscular and stocky build.",
+        "American Pit Bull Terrier has a short coat that is smooth and glossy.",
+        "American Pit Bull Terrier shows a broad flat skull and a strong jawline.",
+        "American Pit Bull Terrier has ears that may be cropped or natural and are set high.",
+        "American Pit Bull Terrier has round to almond-shaped eyes with an alert expression.",
+        "American Pit Bull Terrier has a tail that is thick at the base and tapers to a point.",
+        "American Pit Bull Terrier appears in many coat colors including brindle fawn and black.",
+        "American Pit Bull Terrier stands with a confident and athletic posture."
+    ],
+    "Staffordshire Bull Terrier": [
+        "Staffordshire Bull Terrier has a broad skull and pronounced cheek muscles.",
+        "Staffordshire Bull Terrier has a short smooth close-fitting coat.",
+        "Staffordshire Bull Terrier has dark round eyes set wide apart.",
+        "Staffordshire Bull Terrier has small ears that are rose-shaped or half-pricked.",
+        "Staffordshire Bull Terrier has a wide deep chest.",
+        "Staffordshire Bull Terrier has a medium-length tail that tapers to a point.",
+        "Staffordshire Bull Terrier appears in brindle red black and white colors.",
+        "Staffordshire Bull Terrier has muscular limbs and a sturdy athletic stance."
+    ],
+    "Ragdoll": [
+        "Ragdoll has a semi-long silky plush coat.",
+        "Ragdoll has a light-colored body with darker points on the ears face legs and tail.",
+        "Ragdoll has striking blue oval-shaped eyes.",
+        "Ragdoll has medium-sized ears with rounded tips.",
+        "Ragdoll has a large sturdy frame.",
+        "Ragdoll has a long bushy tail matching the point color.",
+        "Ragdoll has a sweet gentle facial expression.",
+        "Ragdoll shows coat patterns such as colorpoint mitted or bicolor."
+    ],
+    "Bengal": [
+        "Bengal has a short sleek coat with distinctive marbled or spotted patterns.",
+        "Bengal has a wild leopard-like appearance.",
+        "Bengal has large oval eyes in green or gold.",
+        "Bengal has a strong and athletic muscular body.",
+        "Bengal has a thick tail that tapers to a black tip.",
+        "Bengal has a broad modified wedge-shaped head with rounded contours.",
+        "Bengal coat has a unique glittery sheen known as glitter.",
+        "Bengal has small to medium ears with a wide base and rounded tips."
+    ],
+    "Maine Coon": [
+        "Maine Coon is a large-sized cat with a shaggy long coat.",
+        "Maine Coon has a rugged and muscular body.",
+        "Maine Coon has large expressive oval-shaped eyes.",
+        "Maine Coon has large tufted ears set high on the head.",
+        "Maine Coon has a long bushy tail often compared to a raccoon's.",
+        "Maine Coon has a square muzzle and high cheekbones.",
+        "Maine Coon has a gentle and friendly disposition.",
+        "Maine Coon coat is water-resistant and shorter on the shoulders."
+    ],
+    "Birman": [
+        "Birman has medium long silky coat with pale body and dark points.",
+        "Birman has bright blue round eyes.",
+        "Birman shows white gloves on all four paws a key trait.",
+        "Birman ears are medium with rounded tips.",
+        "Birman tail is bushy and proportional.",
+        "Birman face is sweet and rounded compared to a Siamese wedge face.",
+        "Birman coat is soft and not woolly.",
+        "Birman body is medium and strong not as large as a Ragdoll."
+    ],
+    "British Shorthair": [
+        "British Shorthair has a dense plush short coat that is crisp to the touch.",
+        "British Shorthair has a chunky and cobby body with a broad chest.",
+        "British Shorthair has large round copper or gold eyes.",
+        "British Shorthair has a round face with chubby cheeks giving a teddy bear look.",
+        "British Shorthair is famously known for its blue-gray color but comes in many varieties.",
+        "British Shorthair has medium-sized ears with a broad base.",
+        "British Shorthair has a thick tail with a rounded tip.",
+        "British Shorthair has strong thick legs."
+    ],
+    "American Bulldog": [
+        "American Bulldog has a large and powerful muscular build.",
+        "American Bulldog has a short smooth coat typically white with patches of color.",
+        "American Bulldog has a large square head with a powerful muzzle.",
+        "American Bulldog has a deep wide chest.",
+        "American Bulldog has ears that can be rose drop or semi-prick.",
+        "American Bulldog has a strong thick tail that is low-set.",
+        "American Bulldog has a confident and determined expression.",
+        "American Bulldog has heavy bone structure and an athletic gait."
+    ],
+    "Russian Blue": [
+        "Russian Blue has a short dense double coat in a shimmering silver-blue color.",
+        "Russian Blue has vivid green round eyes.",
+        "Russian Blue has a graceful and medium-sized body.",
+        "Russian Blue has large pointed ears that are wide at the base.",
+        "Russian Blue has a modified wedge-shaped head with a blunt muzzle.",
+        "Russian Blue has a plush coat that is soft and silky to the touch.",
+        "Russian Blue often appears to be smiling due to its upturned mouth corners.",
+        "Russian Blue has a long slender tail."
+    ],
+    "Abyssinian": [
+        "Abyssinian has a ticked tabby coat giving it a shimmering multi-hued appearance.",
+        "Abyssinian has large almond-shaped eyes in gold green or hazel.",
+        "Abyssinian has large alert ears that are broad at the base.",
+        "Abyssinian has a slender and muscular body with fine bones.",
+        "Abyssinian has a long tapering tail.",
+        "Abyssinian has a slightly wedged head with gentle contours.",
+        "Abyssinian coat is short fine and resilient to the touch.",
+        "Abyssinian appears in colors like ruddy sorrel blue and fawn."
+    ],
+    "Chihuahua": [
+        "Chihuahua has a compact small frame with a rounded apple head.",
+        "Chihuahua has large round expressive eyes.",
+        "Chihuahua has large upright ears set at about a 45 degree angle when alert.",
+        "Chihuahua has a short slightly pointed muzzle.",
+        "Chihuahua may have a smooth coat or a longhaired coat depending on the variety.",
+        "Chihuahua has a sickle-shaped tail carried over the back.",
+        "Chihuahua commonly appears in fawn black chocolate and cream colors.",
+        "Chihuahua has a delicate yet well-balanced body."
+    ],
+    "Boxer": [
+        "Boxer has a short smooth fawn or brindle coat.",
+        "Boxer has a muscular square-built body.",
+        "Boxer has an undershot jaw and a wrinkled forehead.",
+        "Boxer has dark soulful eyes.",
+        "Boxer has ears that may be cropped to stand erect or left natural.",
+        "Boxer has a tail that is often docked.",
+        "Boxer has a distinctive black mask on its muzzle.",
+        "Boxer moves with a powerful and agile gait."
+    ],
+    "Persian": [
+        "Persian has a long thick and luxurious coat requiring daily grooming.",
+        "Persian has a short cobby body with heavy bones.",
+        "Persian has large round and brilliant eyes in various colors.",
+        "Persian has a distinctive flat brachycephalic face with a short nose.",
+        "Persian has small round-tipped ears set low and far apart.",
+        "Persian has a short thick and bushy tail.",
+        "Persian has a sweet and placid expression.",
+        "Persian has a quiet and docile temperament."
+    ],
+    "Egyptian Mau": [
+        "Egyptian Mau has a short coat with a naturally spotted pattern.",
+        "Egyptian Mau is the fastest domestic cat breed.",
+        "Egyptian Mau has large gooseberry-green almond-shaped eyes.",
+        "Egyptian Mau has a distinctive mascara line extending from the eye to the cheek.",
+        "Egyptian Mau has a characteristic worried or curious expression.",
+        "Egyptian Mau has medium to large ears that are broad at the base.",
+        "Egyptian Mau has a graceful and muscular medium-sized body.",
+        "Egyptian Mau has hind legs that are slightly longer than the front legs."
+    ],
+    "Miniature Pinscher": [
+        "Miniature Pinscher has a short smooth coat typically in red or black and rust.",
+        "Miniature Pinscher has a compact wedge-shaped and muscular body.",
+        "Miniature Pinscher has a high-stepping hackney-like gait.",
+        "Miniature Pinscher has dark oval-shaped eyes.",
+        "Miniature Pinscher has ears that are often cropped and erect.",
+        "Miniature Pinscher has a high-set tail that is typically docked.",
+        "Miniature Pinscher has a fearless and confident personality.",
+        "Miniature Pinscher resembles a small Doberman but is not a miniature version."
+    ],
+    "Sphynx": [
+        "Sphynx is a hairless cat breed with a fine downy fuzz.",
+        "Sphynx has a wrinkled skin especially around the muzzle and shoulders.",
+        "Sphynx has very large lemon-shaped eyes.",
+        "Sphynx has extremely large ears that are wide at the base.",
+        "Sphynx has a warm chamois-like skin texture.",
+        "Sphynx has a muscular and medium-boned body.",
+        "Sphynx has a long whip-like tail.",
+        "Sphynx has prominent cheekbones and whisker pads."
+    ],
+    "Bombay": [
+        "Bombay has a sleek patent-leather black coat that is short and glossy.",
+        "Bombay resembles a miniature black panther.",
+        "Bombay has large round copper or gold-colored eyes.",
+        "Bombay has a medium-sized muscular body.",
+        "Bombay has a rounded head with a short muzzle.",
+        "Bombay has ears that are medium in size and set well apart.",
+        "Bombay has a tail that is straight and of medium length.",
+        "Bombay has black paws and a black nose."
+    ],
+    "Beagle": [
+        "Beagle has a short dense coat with tricolor or bicolor patterns.",
+        "Beagle has a slightly domed head with a straight muzzle.",
+        "Beagle has brown or hazel eyes with a pleading expression.",
+        "Beagle has long low-set ears that hang close to the cheeks.",
+        "Beagle has a moderately long tail carried high.",
+        "Beagle has a deep chest and a compact body.",
+        "Beagle often shows a black saddle with white legs and tan markings.",
+        "Beagle has a broad nose with open nostrils."
+    ],
+    "Siamese": [
+        "Siamese has a short fine coat with a pale body and darker points.",
+        "Siamese has a slender and elegant tubular body.",
+        "Siamese has deep blue almond-shaped eyes that are slanted.",
+        "Siamese has a long wedge-shaped head.",
+        "Siamese has large pointed ears that are wide at the base.",
+        "Siamese has a long thin whip-like tail.",
+        "Siamese is known for its vocal and demanding personality.",
+        "Siamese points come in seal chocolate blue and lilac."
+    ],
+    "English Cocker Spaniel": [
+        "English Cocker Spaniel has a silky medium-length coat with feathering.",
+        "English Cocker Spaniel has a sturdy and compact body.",
+        "English Cocker Spaniel has melting dark eyes with a gentle expression.",
+        "English Cocker Spaniel has long low-set ears covered in wavy hair.",
+        "English Cocker Spaniel has a tail that is customarily docked and wags merrily.",
+        "English Cocker Spaniel has a softly contoured head.",
+        "English Cocker Spaniel appears in solid colors roans and particolors.",
+        "English Cocker Spaniel has a cheerful and affectionate nature."
+    ],
+    "English Setter": [
+        "English Setter has a long silky coat with feathering on the ears legs and tail.",
+        "English Setter shows belton coat patterns in blue orange lemon or liver.",
+        "English Setter has a long lean head with a square muzzle.",
+        "English Setter has dark brown oval-shaped eyes.",
+        "English Setter has low-set ears that hang close to the head.",
+        "English Setter has a straight feathered tail carried level with the back.",
+        "English Setter has a deep chest with well-sprung ribs.",
+        "English Setter moves with a graceful flowing gait."
+    ],
+    "Havanese": [
+        "Havanese has a long soft double coat that can be wavy or curly.",
+        "Havanese has a small but sturdy body.",
+        "Havanese has large dark almond-shaped eyes with a mischievous expression.",
+        "Havanese has drop ears that are covered with long hair.",
+        "Havanese has a high-set plumed tail that arches over its back.",
+        "Havanese has a springy gait that is a hallmark of the breed.",
+        "Havanese coat comes in a wide variety of colors and patterns.",
+        "Havanese has a full muzzle that is not snipey or blunt."
+    ],
+    "Wheaten Terrier": [
+        "Wheaten Terrier has a soft silky coat with a wheaten pale gold color.",
+        "Wheaten Terrier has hair that is wavy or gently flowing and never wiry.",
+        "Wheaten Terrier has dark hazel or brown eyes with a friendly look.",
+        "Wheaten Terrier has small to medium ears that fold forward.",
+        "Wheaten Terrier has a strong square-shaped muzzle.",
+        "Wheaten Terrier has a tail carried upright and sometimes docked.",
+        "Wheaten Terrier has a coat that often shows a subtle shimmering quality.",
+        "Wheaten Terrier has a well-proportioned agile body."
+    ],
+    "Pomeranian": [
+        "Pomeranian has a dense double coat with a fluffy outer layer.",
+        "Pomeranian has a wedge-shaped head with a short muzzle.",
+        "Pomeranian has almond-shaped dark eyes.",
+        "Pomeranian has small erect ears set high.",
+        "Pomeranian has a heavily plumed tail carried over the back.",
+        "Pomeranian appears in many coat colors from orange and cream to black and blue.",
+        "Pomeranian has a compact squarely built body.",
+        "Pomeranian has a distinctive mane of fur around the neck."
+    ],
+    "Scottish Terrier": [
+        "Scottish Terrier has a hard wiry outer coat and a soft dense undercoat.",
+        "Scottish Terrier has a compact body that is low to the ground.",
+        "Scottish Terrier has a distinctive beard mustache and eyebrows.",
+        "Scottish Terrier has small bright almond-shaped eyes.",
+        "Scottish Terrier has small neat prick ears.",
+        "Scottish Terrier has a tail that is thick at the base and carried high.",
+        "Scottish Terrier coat is typically black brindle or wheaten.",
+        "Scottish Terrier has a bold and confident expression."
+    ],
+    "Shiba Inu": [
+        "Shiba Inu has a stiff straight outer coat with a soft thick undercoat.",
+        "Shiba Inu has a compact frame with well-developed muscles.",
+        "Shiba Inu has small triangular ears that are pricked and tilt forward.",
+        "Shiba Inu has deep-set triangular eyes.",
+        "Shiba Inu has a thick curled tail carried over its back.",
+        "Shiba Inu coat colors are red black and tan or sesame.",
+        "Shiba Inu has a spirited and bold fox-like expression.",
+        "Shiba Inu has urajiro which are white markings on the cheeks muzzle and chest."
+    ],
+    "Basset Hound": [
+        "Basset Hound has an extremely long heavy body on short legs.",
+        "Basset Hound has very long velvety ears that hang low.",
+        "Basset Hound has sad-looking droopy eyes with a prominent haw.",
+        "Basset Hound has a large domed head with a wrinkled brow.",
+        "Basset Hound has a short smooth dense coat in classic hound colors.",
+        "Basset Hound has a long tail carried high with a slight curve.",
+        "Basset Hound has large paws with thick pads.",
+        "Basset Hound has a deep powerful chest."
+    ],
+    "Saint Bernard": [
+        "Saint Bernard has a massive muscular frame.",
+        "Saint Bernard has a dense coat that is smooth or slightly rough with white and red-brown markings.",
+        "Saint Bernard has a large head with a short muzzle and deep stop.",
+        "Saint Bernard has dark brown eyes with a gentle expression.",
+        "Saint Bernard has medium-sized ears set high and dropping close to the head.",
+        "Saint Bernard has a long heavy slightly curved tail.",
+        "Saint Bernard has a broad deep chest.",
+        "Saint Bernard often shows a white blaze on the face and white paws."
+    ],
+    "German Shorthaired": [
+        "German Shorthaired Pointer has a short thick and water-repellent coat.",
+        "German Shorthaired Pointer has a lean athletic and well-balanced body.",
+        "German Shorthaired Pointer has a coat that is typically solid liver or liver and white.",
+        "German Shorthaired Pointer has almond-shaped eyes with an intelligent look.",
+        "German Shorthaired Pointer has broad ears that are set high and lie flat.",
+        "German Shorthaired Pointer has a tail that is customarily docked.",
+        "German Shorthaired Pointer has an aristocratic and noble appearance.",
+        "German Shorthaired Pointer is known for its versatility in hunting."
+    ],
+    "Samoyed": [
+        "Samoyed has a thick white double coat that is weather-resistant.",
+        "Samoyed has a characteristic smiling expression known as the Sammy smile.",
+        "Samoyed has a strong and compactly built body.",
+        "Samoyed has dark almond-shaped eyes that contrast with its white fur.",
+        "Samoyed has thick triangular ears that are erect.",
+        "Samoyed has a heavily plumed tail carried over its back.",
+        "Samoyed has black points on its lips nose and eye rims.",
+        "Samoyed moves with a quick and agile trot."
+    ],
+    "Yorkshire Terrier": [
+        "Yorkshire Terrier has a long fine silky coat that is steel blue and tan.",
+        "Yorkshire Terrier has a small compact body.",
+        "Yorkshire Terrier has a confident and courageous demeanor.",
+        "Yorkshire Terrier has dark sparkling eyes with a sharp intelligent expression.",
+        "Yorkshire Terrier has small V-shaped erect ears.",
+        "Yorkshire Terrier has a tail that is docked to a medium length.",
+        "Yorkshire Terrier has hair on its head that is often tied up in a topknot.",
+        "Yorkshire Terrier has a level topline."
+    ],
+    "Pug": [
+        "Pug has a short smooth glossy coat in fawn or black.",
+        "Pug has a compact square and cobby body.",
+        "Pug has a heavily wrinkled face with a short flat muzzle.",
+        "Pug has large dark round and expressive eyes.",
+        "Pug has small thin velvety ears that are either rose or button shaped.",
+        "Pug has a tightly curled tail carried over the hip.",
+        "Pug has a distinctive black mask and trace down the back.",
+        "Pug has a charming and mischievous expression."
+    ],
+    "Japanese Chin": [
+        "Japanese Chin has a long profuse silky coat.",
+        "Japanese Chin has a distinctively aristocratic and charming expression.",
+        "Japanese Chin has a broad head with a very short muzzle.",
+        "Japanese Chin has large dark wide-set eyes.",
+        "Japanese Chin has small V-shaped ears covered with long hair.",
+        "Japanese Chin has a heavily plumed tail carried over its back.",
+        "Japanese Chin has a compact and squarely built body.",
+        "Japanese Chin often has a white coat with black or red patches."
+    ],
+    "Great Pyrenees": [
+        "Great Pyrenees has a thick weather-resistant double coat that is primarily white.",
+        "Great Pyrenees is a large and majestic dog with a muscular build.",
+        "Great Pyrenees has a wedge-shaped head with a slightly rounded crown.",
+        "Great Pyrenees has dark brown almond-shaped eyes with an intelligent expression.",
+        "Great Pyrenees has V-shaped ears with rounded tips that lie flat.",
+        "Great Pyrenees has a well-plumed tail that may be carried low or over the back.",
+        "Great Pyrenees can have markings of gray badger or tan.",
+        "Great Pyrenees has a patient and calm demeanor."
+    ],
+    "Newfoundland": [
+        "Newfoundland has a heavy water-resistant double coat.",
+        "Newfoundland is a massive dog with a powerful and heavily boned body.",
+        "Newfoundland has a sweet and gentle expression.",
+        "Newfoundland has small dark brown eyes set wide apart.",
+        "Newfoundland has small triangular ears with rounded tips.",
+        "Newfoundland has a broad tail that acts as a rudder when swimming.",
+        "Newfoundland has webbed feet which aid in swimming.",
+        "Newfoundland coat is typically black brown or gray."
+    ],
+    "Leonberger": [
+        "Leonberger is a giant dog with a muscular yet elegant build.",
+        "Leonberger has a medium-to-long water-resistant double coat.",
+        "Leonberger has a distinctive black mask on its face.",
+        "Leonberger has kind medium-sized brown eyes.",
+        "Leonberger has medium-sized triangular ears that hang close to the head.",
+        "Leonberger has a well-feathered tail that hangs down.",
+        "Leonberger has a prominent mane on its neck and chest.",
+        "Leonberger coat colors range from lion-yellow to red-brown."
+    ],
+    "Keeshond": [
+        "Keeshond has a thick double coat with a plush undercoat.",
+        "Keeshond has distinctive spectacle markings around its eyes.",
+        "Keeshond has a compact body with a short back.",
+        "Keeshond has small pointed ears that are erect.",
+        "Keeshond has a richly plumed tail that is tightly curled over its back.",
+        "Keeshond has a fox-like head with an intelligent expression.",
+        "Keeshond coat is a mixture of gray black and cream.",
+        "Keeshond is a lively and outgoing breed."
+    ]
+}
