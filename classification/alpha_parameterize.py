@@ -34,7 +34,7 @@ WEIGHT_DEC = 1e-4
 BERT_NAME  = "bert-base-uncased"
 RIDGE_LAMBDA   = 1e-2
 ALPHAS         = [0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
-TOPK_MASK      = 10    # top-K 재랭킹 (0이면 비활성)
+TOPK_MASK      = 0    # top-K 재랭킹 (0이면 비활성)
 CKPT_PATH      = "classification/save_model/classification_model.pth"   # 기존 모델 체크포인트(.pt) 있으면 경로 지정
 TEXT_PATH      = "my_fuctions/text.json"
 
@@ -248,6 +248,7 @@ class LogitFusionModel(nn.Module):
 
 # -------------------- Main --------------------
 def main():
+    print(TEXT_PATH)
     set_seed(42)
     # 0) Data
     trainset, testset, dl_tr, dl_te, classes = get_loaders()
@@ -277,7 +278,7 @@ def main():
     print("Extracting features from training set...")
     H_tr, L_tr, Y_tr = extract_feats(model, dl_tr)
     print("Extracting features from test set...")
-    H_te, L_te, Y_te = extract_feats(model, dl_te) # ❗ FIX: H_tr이 아닌 H_te로 올바르게 할당
+    H_te, L_te, Y_te = extract_feats(model, dl_te)
 
     # 3) 이미지 프로토타입 생성 (학습 데이터 기준)
     IMG_protos = class_image_prototypes(H_tr, Y_tr, num_classes=K)

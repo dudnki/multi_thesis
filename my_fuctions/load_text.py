@@ -32,5 +32,4 @@ def default_prompts_from_json(classes, json_path):
         else:
             # 없는 클래스는 기존 템플릿으로 생성합니다.
             d[c] = [t.format(c=c) for t in tmpl]
-    
     return d, in_text_list
