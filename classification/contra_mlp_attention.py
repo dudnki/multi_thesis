@@ -1,9 +1,9 @@
 # ======= Text-Prior Logit Fusion (No-CLIP) on Oxford-IIIT Pets =======
 # - 이미지: 기존 분류기 특징공간(백본 동결 가능)
 # - 텍스트: BERT 라벨-문장 컨텍스트(여러 문장 평균)
-# - 정렬: Ridge (BERT -> 이미지 특징공간)
-# - 추론: logits_final = logits_base + alpha * prior   (안정화: zero-mean + top-K)
-#
+# contra+mlp+attention
+
+
 # deps: torch, torchvision, transformers, scikit-learn, tqdm, numpy, pandas
 
 import os, json, math, numpy as np
